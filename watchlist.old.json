@@ -1,0 +1,173 @@
+{
+  "ASR/USDT:USDT|1h": {
+    "symbol": "ASR/USDT:USDT",
+    "timeframe": "1h",
+    "direction": "up",
+    "trendline": {
+      "slope": 0.000491803278688525,
+      "intercept": 0.725295081967213,
+      "anchor_ts": 1782079200000,
+      "touches": 3,
+      "n_points": 5
+    },
+    "tl_fit_ts": 1783152000000,
+    "distance_pct": 0.132,
+    "close": 0.873,
+    "corr_30d": 0.13913242369454606,
+    "corr_90d": 0.26747305405564875,
+    "added_ts": 1783156864190,
+    "updated_ts": 1783157008449
+  },
+  "ASTER/USDT:USDT|1h": {
+    "symbol": "ASTER/USDT:USDT",
+    "timeframe": "1h",
+    "direction": "up",
+    "trendline": {
+      "slope": 0.00030307692307692387,
+      "intercept": 0.5496661538461537,
+      "anchor_ts": 1782079200000,
+      "touches": 3,
+      "n_points": 7
+    },
+    "tl_fit_ts": 1783152000000,
+    "distance_pct": 0.096,
+    "close": 0.6406,
+    "corr_30d": 0.45565736263837114,
+    "corr_90d": 0.4419616396807434,
+    "added_ts": 1783156864955,
+    "updated_ts": 1783157008491
+  },
+  "BLUAI/USDT:USDT|1h": {
+    "symbol": "BLUAI/USDT:USDT",
+    "timeframe": "1h",
+    "direction": "up",
+    "trendline": {
+      "slope": 2.5441860465116266e-05,
+      "intercept": 0.007056488372093026,
+      "anchor_ts": 1782079200000,
+      "touches": 4,
+      "n_points": 4
+    },
+    "tl_fit_ts": 1783152000000,
+    "distance_pct": 0.299,
+    "close": 0.014682,
+    "corr_30d": -0.06569923217112299,
+    "corr_90d": 0.05532205936881107,
+    "added_ts": 1783156876175,
+    "updated_ts": 1783157008541
+  },
+  "BTCDOM/USDT:USDT|1h": {
+    "symbol": "BTCDOM/USDT:USDT",
+    "timeframe": "1h",
+    "direction": "down",
+    "trendline": {
+      "slope": -3.9219512195121773,
+      "intercept": 6590.309756097557,
+      "anchor_ts": 1782079200000,
+      "touches": 3,
+      "n_points": 3
+    },
+    "tl_fit_ts": 1783152000000,
+    "distance_pct": -0.058,
+    "close": 5418.4,
+    "corr_30d": -0.5588548038306137,
+    "corr_90d": -0.1892393821911747,
+    "added_ts": 1783156879863,
+    "updated_ts": 1783157008591
+  },
+  "CL/USDT:USDT|1h": {
+    "symbol": "CL/USDT:USDT",
+    "timeframe": "1h",
+    "direction": "down",
+    "trendline": {
+      "slope": -0.03240506329113927,
+      "intercept": 78.25544303797469,
+      "anchor_ts": 1782079200000,
+      "touches": 3,
+      "n_points": 6
+    },
+    "tl_fit_ts": 1783152000000,
+    "distance_pct": 0.133,
+    "close": 68.69,
+    "corr_30d": -0.029082846458178182,
+    "corr_90d": -0.3724914470354161,
+    "added_ts": 1783156885118,
+    "updated_ts": 1783157008632
+  },
+  "GOOGL/USDT:USDT|1h": {
+    "symbol": "GOOGL/USDT:USDT",
+    "timeframe": "1h",
+    "direction": "up",
+    "trendline": {
+      "slope": 0.17372727272727284,
+      "intercept": 308.22790909090907,
+      "anchor_ts": 1782079200000,
+      "touches": 3,
+      "n_points": 7
+    },
+    "tl_fit_ts": 1783152000000,
+    "distance_pct": -0.08,
+    "close": 359.71,
+    "corr_30d": 0.19230342452115445,
+    "corr_90d": 0.300760419259494,
+    "added_ts": 1783156910423,
+    "updated_ts": 1783157008674
+  },
+  "MEME/USDT:USDT|1h": {
+    "symbol": "MEME/USDT:USDT",
+    "timeframe": "1h",
+    "direction": "up",
+    "trendline": {
+      "slope": 2.578947368421044e-07,
+      "intercept": 0.0005355789473684212,
+      "anchor_ts": 1782079200000,
+      "touches": 5,
+      "n_points": 7
+    },
+    "tl_fit_ts": 1783152000000,
+    "distance_pct": 0.272,
+    "close": 0.0006141,
+    "corr_30d": 0.38639382556038293,
+    "corr_90d": 0.3797287837627764,
+    "added_ts": 1783156941508,
+    "updated_ts": 1783157008716
+  },
+  "ORCA/USDT:USDT|1h": {
+    "symbol": "ORCA/USDT:USDT",
+    "timeframe": "1h",
+    "direction": "up",
+    "trendline": {
+      "slope": 0.0012258064516129043,
+      "intercept": 0.8735483870967738,
+      "anchor_ts": 1782079200000,
+      "touches": 4,
+      "n_points": 7
+    },
+    "tl_fit_ts": 1783152000000,
+    "distance_pct": 0.417,
+    "close": 1.244,
+    "corr_30d": 0.3765738021531894,
+    "corr_90d": 0.27957356870555394,
+    "added_ts": 1783156953822,
+    "updated_ts": 1783157008761
+  },
+  "XPIN/USDT:USDT|1h": {
+    "symbol": "XPIN/USDT:USDT",
+    "timeframe": "1h",
+    "direction": "up",
+    "trendline": {
+      "slope": 1.698924731182795e-06,
+      "intercept": 0.0009086129032258066,
+      "anchor_ts": 1782079200000,
+      "touches": 3,
+      "n_points": 9
+    },
+    "tl_fit_ts": 1783152000000,
+    "distance_pct": 0.432,
+    "close": 0.001421,
+    "corr_30d": 0.039858276350563424,
+    "corr_90d": 0.2600592088921486,
+    "added_ts": 1783157002005,
+    "updated_ts": 1783157008812
+  }
+}
