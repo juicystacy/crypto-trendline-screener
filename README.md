@@ -1,46 +1,75 @@
 # Binance Futures Crypto Screener
 
 Scans all Binance USDT-M perpetual futures every hour, keeps a persistent
-watchlist of coins that are trending **and** sitting on a valid trendline,
-and removes them when a confirmed 3-candle breakout invalidates the setup.
+watchlist of coins that are **uncorrelated with BTC** and sitting on a valid
+trendline, and removes them when a confirmed 3-candle breakout invalidates the
+setup. A second pass has Claude judge each qualified chart like a trader.
 
 ## Logic pipeline
 
 1. **BTC-correlation filter** — Pearson correlation with BTCUSDT over the
-   last 30 **and** 90 daily candles must both be `<= 0.5`.
-   By default the correlation is computed on daily *returns* (the
-   statistically sound approach — raw-price correlation between two trending
-   assets is almost always spuriously high). Set `CORR_ON_RETURNS = False`
-   in `config.py` to use raw close prices instead.
-2. **Trend structure** (per timeframe: m15, h1, h4, d1) — at least
-   3 Higher Highs + 3 Higher Lows (uptrend) or 3 Lower Highs + 3 Lower Lows
-   (downtrend). A Higher High is a *relation* between two consecutive swing
-   highs, so 3 HHs require **4 strictly rising swing highs** (and likewise
-   per side) — this is what the code enforces. Swings come from a
-   non-repainting ±5-bar extremum algorithm that discards unconfirmed
-   pivots near both data edges.
-3. **Trendline** — least-squares line through the trend's Higher Lows
-   (uptrend support) or Lower Highs (downtrend resistance); only the
-   trailing monotonic swing run is fitted, and it requires ≥ 3 confirmed
-   touches within 0.5% of the line plus the correct slope sign.
-4. **Distance check** — latest closed candle must be within **0.5%** of the
-   projected trendline.
-5. **Invalidation** — a coin is removed when this 3-candle sequence closes
+   last 30 **and** 90 daily candles must both be `<= 0.5`. By default the
+   correlation is computed on daily *returns* (the statistically sound
+   approach — raw-price correlation between two trending assets is almost
+   always spuriously high). Set `CORR_ON_RETURNS = False` in `config.py` to
+   use raw close prices instead. TradFi underlyings (stocks/gold/commodities)
+   skip this filter — BTC correlation is meaningless for them.
+2. **Swings** — a bar is a swing high when its candle **body top**
+   (`max(open, close)`) is the extreme of a symmetric ±5-bar window, swing
+   lows on the body bottom. Bodies, not wicks: a pivot is where a candle body
+   got rejected. Bars within 5 of either data edge lack a full confirmation
+   window and are discarded, so a swing can never appear on the newest bars
+   and later vanish (non-repainting).
+3. **Trendline + trend** — drawn the way a trader draws it: the line **rests
+   on** the extreme pivots (under the swing lows for support, over the swing
+   highs for resistance), it is **not** a least-squares fit through the
+   middle. Every pivot pair defines a candidate; a candidate is valid when
+   - its slope has the right sign (support rises, resistance falls) and is
+     steeper than `MIN_SLOPE_PCT_PER_BAR` (a near-flat line is an S/R *level*,
+     not a trend),
+   - every pivot from its first touch onward stays on the correct side,
+     allowing `LINE_PIERCE_TOL_PCT` of wick noise,
+   - no candle **close** has cut through it (looser `CLOSE_PIERCE_TOL_PCT`),
+   - at least `MIN_TOUCHES` (3) pivots sit within `TOUCH_TOLERANCE_PCT`
+     (0.5%) of it. Touches need **not** be monotonic.
+
+   The valid line with the most touches wins (ties: longest span). Its
+   direction *is* the trend — rising support = uptrend, falling resistance =
+   downtrend. Stablecoins / dead markets (whole history spans less than
+   `MIN_RANGE_PCT`) are rejected before any line is fitted.
+4. **Distance** — the latest close's signed distance to the projected line is
+   recorded for display; there is **no** max-distance gate. A valid line far
+   from price is still tracked, and the table sorts by |distance| so near
+   setups float to the top.
+5. **LLM second pass** — each qualified chart is rendered as a candlestick
+   image and Claude vision judges the trendline like a trader on TradingView
+   (clean stepping pullbacks, visible slope, no closes cutting through).
+   Geometry gives recall; this gives precision. The verdict shows in the
+   **AI** column (✓ / ✗). Only entries whose line was (re)fitted since their
+   last verdict are re-judged, so a scan costs a few cents. Needs
+   `ANTHROPIC_API_KEY`; disable with `--no-llm` or `LLM_FILTER = False`.
+6. **Invalidation** — a coin is removed when this 3-candle sequence **closes**
    through the line (below support / above resistance):
-   - **C1** closes through the line on volume `>= 2× Volume-MA(20)`
-   - **C2** closes through the line and is **not** a hammer
-     (shooting star for downtrends)
-   - **C3** closes through the line
+   - **C1** closes through on volume `>= 2× Volume-MA(20)`
+   - **C2** closes through and is **not** a hammer (shooting star for
+     downtrends)
+   - **C3** closes through
+
+   Every 3-candle window in the fetched history is scanned (not just the last
+   3), so a sequence that completed between scan cycles or during downtime is
+   still caught.
 
 The watchlist is persisted to `watchlist.json` between cycles and restarts.
-Trendlines are stored as `slope/intercept` anchored to a candle timestamp,
-so they are projected forward onto new candles in later cycles.
+Trendlines are stored as `slope/intercept` anchored to a candle timestamp, so
+they are projected forward onto new candles in later cycles.
 
 ## Install
 
 ```bash
 pip install -r requirements.txt
 ```
+
+(The LLM second pass runs by default; use `--no-llm` to skip it.)
 
 > `pandas_ta` is intentionally **not** used — it is unmaintained and breaks
 > on modern numpy/Python. The only indicators needed (volume SMA, candle
@@ -53,9 +82,11 @@ python screener.py                 # loop forever, scan every hour
 python screener.py --once          # single scan cycle, then exit
 python screener.py --once --max-symbols 30   # quick smoke test
 python screener.py --interval 1800 # custom cycle length (seconds)
+python screener.py --no-llm        # skip the Claude chart filter
 ```
 
-No API keys are required — only public market-data endpoints are used.
+No exchange API keys are required — only public market-data endpoints are
+used. The LLM pass needs `ANTHROPIC_API_KEY` in the environment.
 
 ### Network access
 
@@ -83,13 +114,17 @@ limits are respected (`enableRateLimit` in ccxt).
 |---|---|
 | `config.py` | every tunable parameter of the strategy |
 | `exchange.py` | ccxt data access with retry/rate-limit handling |
-| `analysis.py` | swings, trend, trendline, patterns, breakout logic |
+| `analysis.py` | swings, trendline, patterns, breakout logic |
+| `llm_filter.py` | renders charts and asks Claude vision for a verdict |
 | `watchlist.py` | JSON-persisted watchlist state |
 | `screener.py` | scan cycle orchestration, rich output, main loop |
+| `selftest.py` | offline test suite (no network needed) |
+| `diagnose.py` | one-off connectivity / data debugging helper |
 | `watchlist.json` | generated at runtime — current watchlist state |
 
 ## Tuning
 
 All thresholds live in `config.py`: swing sensitivity (`SWING_ORDER`),
-number of required swings/touches, the 0.5% distance and touch tolerances,
-volume-spike multiple, hammer geometry, and the scan interval.
+required touches (`MIN_TOUCHES`), the 0.5% touch tolerance, pivot/close pierce
+tolerances, minimum slope, stablecoin range guard, volume-spike multiple,
+hammer geometry, the LLM model, and the scan interval.
