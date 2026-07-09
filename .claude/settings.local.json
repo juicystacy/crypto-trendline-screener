@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python screener.py --once)"
+      "Bash(python screener.py --once)",
+      "Bash(PYTHONIOENCODING=utf-8 python -c ' *)",
+      "Bash(PYTHONIOENCODING=utf-8 python -c \"import config;print\\(config.TIMEFRAMES\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('screener.py',encoding='utf-8'\\).read\\(\\)\\); print\\('screener.py OK'\\)\")",
+      "Bash(python -c ' *)"
     ]
   }
 }

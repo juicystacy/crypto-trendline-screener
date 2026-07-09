@@ -247,6 +247,10 @@ def run_cycle(exchange, watchlist: dict, cycle_no: int,
     scan_structures(exchange, candidates, watchlist, cache)
     prune_broken_entries(exchange, watchlist, cache, active_symbols)
 
+    # Persist scan results before the (slow, failure-prone) LLM pass so an
+    # exchange/LLM error or Ctrl+C mid-filter can't discard this cycle's work.
+    wl.save_watchlist(watchlist)
+
     if config.LLM_FILTER:
         llm_filter.apply_filter(
             watchlist, cache,
@@ -276,10 +280,13 @@ def main_loop(once: bool, interval: int, max_symbols: int | None) -> None:
         try:
             run_cycle(exchange, watchlist, cycle_no, max_symbols)
         except KeyboardInterrupt:
+            # Save whatever the interrupted cycle managed to update before exit.
+            wl.save_watchlist(watchlist)
             raise
         except Exception:
             # One bad cycle (exchange outage etc.) must not kill the loop.
             log.exception("Cycle #%d failed — retrying next interval", cycle_no)
+            wl.save_watchlist(watchlist)
 
         if once:
             break

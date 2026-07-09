@@ -66,7 +66,17 @@ def save_watchlist(watchlist: dict, path: str = config.WATCHLIST_FILE) -> None:
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as fh:
             json.dump(watchlist, fh, indent=2)
-        os.replace(tmp_path, path)
+        # OneDrive/antivirus briefly lock the target during sync, so os.replace
+        # can fail with a transient PermissionError. Retry a few times before
+        # giving up — the lock usually clears within a second or two.
+        for attempt in range(5):
+            try:
+                os.replace(tmp_path, path)
+                break
+            except PermissionError:
+                if attempt == 4:
+                    raise
+                time.sleep(0.5)
     except OSError as exc:
         log.error("Failed to save watchlist: %s", exc)
         if os.path.exists(tmp_path):
